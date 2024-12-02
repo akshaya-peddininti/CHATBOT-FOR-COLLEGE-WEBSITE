@@ -1,0 +1,15 @@
+{
+    "department_info": {
+      "ece": "Electronics and Communication Engineering (ECE) focuses on electronic devices and software interfaces. The fee for the ECE program is 60000 per semester.",
+      "cse": "Computer Science and Engineering (CSE) covers programming, algorithm design, and computer systems. The fee for the CSE program is 60000 per semester.",
+      "mec": "Mechanical Engineering (MEC) involves the design and manufacture of physical or automated systems. The fee for the MEC program is 60000 per semester.",
+      "civil": "Civil Engineering deals with the design, construction, and maintenance of the environment. The fee for the Civil program is 60000 per semester."
+    },
+    "academic_calendar_links": {
+      "I & II Semester": "https://mgit.ac.in/wp-content/uploads/2024/08/I-BTtech-Academic-Calender-2024-25.pdf",
+      "II-IV Semester": "https://mgit.ac.in/wp-content/uploads/2024/08/Almanac-for-B.Tech-III-IV-Semester-2024-25.pdf",
+      "V-VI Semester": "https://mgit.ac.in/wp-content/uploads/2024/08/Almanac-for-B.Tech-V-VI-Semester-2024-25.pdf",
+      "VII-VIII Semester": "https://mgit.ac.in/wp-content/uploads/2024/08/Almanac-for-B.Tech-VII-VIII-Semester-2024-25.pdf"
+    }
+  }
+  

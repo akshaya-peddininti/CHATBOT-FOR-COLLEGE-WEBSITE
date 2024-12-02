@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Page</title>
+</head>
+<body>
+    <h2>Welcome, Admin!</h2>
+    <a href="{{ url_for('logout') }}">Logout</a>
+
+    <h3>Update JSON File</h3>
+    <form method="POST">
+        <textarea name="json_content" rows="20" cols="80">{{ json_content }}</textarea><br><br>
+        <button type="submit">Update</button>
+    </form>
+
+    <h3>Open Links</h3>
+    <ul>
+        <li><a href="https://example.com" target="_blank">Example Link 1</a></li>
+        <li><a href="https://another-example.com" target="_blank">Example Link 2</a></li>
+    </ul>
+</body>
+</html>

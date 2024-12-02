@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Widget</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Chatbot Popup Widget */
+        #chatbotWidget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none; /* Initially hidden */
+            flex-direction: column;
+            background-color: white;
+        }
+
+        #chatHeader {
+            background-color: blue;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        #chatHeader img {
+            height: 30px;
+        }
+
+        #chatHeader button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        #chatContainer {
+            width: 100%; /* Adjust to fit the smaller chatbot container */
+            display: flex;
+            flex-direction: column;
+            height: 100%; /* Ensure it takes full height of the chatbot widget */
+            position: relative;
+            overflow-y: auto;
+            border-radius: 10px; /* Add rounded corners to match a modern design */
+        }
+
+        #chatMessages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-image: url('https://play-lh.googleusercontent.com/CDQ5kmeRh4RyFGhKhUhYOlTBQxPfkwq-lVbe-Cxv5RZk1Embioh5YyK_tIrHwmTd4Fs=w600-h300-pc0xffffff-pd');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover; /* Ensure the image covers the container proportionally */
+            border-radius: 10px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 5px;
+            width: fit-content;
+        }
+
+        .user {
+            align-self: flex-end;
+            background-color: #bde0fe;
+        }
+
+        .bot {
+            align-self: flex-start;
+            background-color: #caf0f8;
+        }
+
+        #inputContainer {
+            padding: 10px;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+        }
+
+        #userInput {
+            width: calc(100% - 100px);
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #speakButton, #sendButton {
+            padding: 8px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+            height: 40px;
+        }
+
+        #speakButton {
+            background-color: pink;
+            color: white;
+        }
+
+        #sendButton {
+            background-color: green;
+            color: white;
+        }
+
+        #speakButton:hover {
+            background-color: #ff69b4;
+        }
+
+        #sendButton:hover {
+            background-color: #32cd32;
+        }
+
+        #stopLanguageContainer {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f1f1f1;
+            border-top: 1px solid #ccc;
+        }
+
+        #stopButton {
+            background-color: red;
+            color: white;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #stopButton:hover {
+            background-color: #dc143c;
+        }
+
+        #language {
+            padding: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Chat Icon Button */
+        #chatButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: blue;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        #chatButton:hover {
+            background-color: darkblue;
+        }
+    </style>
+</head>
+<body>
+    <!-- Chat Button -->
+    <button id="chatButton" onclick="toggleChat()">💬</button>
+
+    <!-- Chatbot Widget -->
+    <div id="chatbotWidget">
+        <div id="chatHeader">
+            <img src="https://mgit.ac.in/wp-content/uploads/2022/09/logo5-mgit-25-09-2022.png" alt="MGIT Logo">
+            MGIT College
+            <button onclick="toggleChat()">✖</button>
+        </div>
+        <div id="chatContainer">
+            <div id="chatMessages"></div>
+            <div id="inputContainer">
+                <input type="text" id="userInput" placeholder="Type your question...">
+                <button id="sendButton" onclick="sendMessage()">Send</button>
+                <button id="speakButton" onclick="startSpeechRecognition()">🎤</button>
+            </div>
+        </div>
+        <div id="stopLanguageContainer">
+            <button id="stopButton" onclick="stopSpeaking()">Stop</button>
+            <select id="language">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+                <option value="te">Telugu</option>
+            </select>
+        </div>
+    </div>
+
+    <script>
+        function toggleChat() {
+            const chatWidget = document.getElementById('chatbotWidget');
+            const chatButton = document.getElementById('chatButton');
+            if (chatWidget.style.display === 'none' || chatWidget.style.display === '') {
+                chatWidget.style.display = 'flex'; // Show widget
+                chatButton.style.display = 'none'; // Hide button
+            } else {
+                chatWidget.style.display = 'none'; // Hide widget
+                chatButton.style.display = 'flex'; // Show button
+            }
+        }
+
+        function startSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Your browser does not support speech recognition.");
+                return;
+            }
+
+            const recognition = new webkitSpeechRecognition();
+            recognition.lang = document.getElementById('language').value === 'hi' ? 'hi-IN' : 
+                               document.getElementById('language').value === 'te' ? 'te-IN' : 'en-US';
+            recognition.interimResults = false;
+
+            recognition.onresult = function(event) {
+                const speechResult = event.results[0][0].transcript;
+                document.getElementById('userInput').value = speechResult;
+                sendMessage();
+            };
+
+            recognition.onerror = function(event) {
+                alert("Speech recognition error: " + event.error);
+            };
+
+            recognition.start();
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('message-input').value;
+            fetch('http://localhost:5000/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('chatbot-response').innerText = data.response;
+            });
+        }
+        
+
+            displayMessage(userInput, 'user');
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userInput, language: selectedLanguage })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayMessage(data.response, 'bot');
+            });
+
+            document.getElementById('userInput').value = '';
+        }
+
+        function displayMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.innerHTML = text;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            if (sender === 'bot') {
+                speakText(text);
+            }
+        }
+
+        function speakText(text) {
+            const speechSynthesis = window.speechSynthesis;
+            const speech = new SpeechSynthesisUtterance(text);
+            const selectedLanguage = document.getElementById('language').value;
+
+            if (selectedLanguage === 'hi') {
+                speech.lang = 'hi-IN';
+            } else if (selectedLanguage === 'te') {
+                speech.lang = 'te-IN';
+            } else {
+                speech.lang = 'en-US';
+            }
+
+            speech.volume = 1;
+            speech.pitch = 1;
+            speechSynthesis.speak(speech);
+        }
+
+        function stopSpeaking() {
+            speechSynthesis.cancel();
+        }
+    </script>
+</body>
+</html>

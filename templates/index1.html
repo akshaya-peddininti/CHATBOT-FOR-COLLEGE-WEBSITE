@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <style>
+        /* Existing styles */
+    </style>
+</head>
+<body>
+    <header><img src="https://mgit.ac.in/wp-content/uploads/2022/09/logo5-mgit-25-09-2022.png" alt="MGIT Logo">MGIT College</header>
+    <div id="chatContainer">
+        <div id="messages"></div>
+        <input type="text" id="userInput" placeholder="Type your question...">
+        <div class="button-container">
+            <button class="button send-button" onclick="sendMessage()">Send</button>
+            <button class="button speak-button" id="speakButton" onclick="startSpeechRecognition()">Speak</button>
+            <button class="button stop-button" onclick="stopSpeaking()">Stop</button>
+        </div>
+        <select id="language" name="language">
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="te">Telugu</option>
+        </select>
+    </div>
+
+    <script>
+        const apiUrl = 'http://127.0.0.1:5000/chat'; // Update with your Flask backend URL if deployed
+
+        function startSpeechRecognition() {
+            const speakButton = document.getElementById('speakButton');
+            const selectedLanguage = document.getElementById('language').value;
+
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Your browser does not support speech recognition.");
+                return;
+            }
+
+            const recognition = new webkitSpeechRecognition();
+
+            recognition.lang = selectedLanguage === 'hi' ? 'hi-IN' :
+                selectedLanguage === 'te' ? 'te-IN' : 'en-US';
+
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                speakButton.style.backgroundColor = "#f54242"; // Change to red
+                speakButton.style.color = "#ffffff";
+            };
+
+            recognition.onspeechend = () => {
+                recognition.stop();
+                resetSpeakButtonStyle();
+            };
+
+            recognition.onresult = (event) => {
+                document.getElementById('userInput').value = event.results[0][0].transcript;
+                sendMessage();
+                resetSpeakButtonStyle();
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Error in recognition:", event.error);
+                alert("Speech recognition error. Please try again.");
+                resetSpeakButtonStyle();
+            };
+
+            recognition.start();
+
+            function resetSpeakButtonStyle() {
+                speakButton.style.backgroundColor = "#2196F3";
+                speakButton.style.color = "#ffffff";
+            }
+        }
+        
+        function sendMessage() {
+            const userInput = document.getElementById('userInput').value.trim();
+            const selectedLanguage = document.getElementById('language').value;
+
+            if (!userInput) {
+                alert('Please enter a message');
+                return;
+            }
+
+            displayMessage(userInput, 'user');
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userInput, language: selectedLanguage })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.response) {
+                    displayMessage(data.response, 'bot');
+                } else {
+                    displayMessage('Error: No response from server.', 'bot');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayMessage('Error: Unable to connect to server.', 'bot');
+            });
+        }
+        
+        function displayMessage(text, sender) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.textContent = text;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            if (sender === 'bot') {
+                const speech = new SpeechSynthesisUtterance(text);
+                const selectedLanguage = document.getElementById('language').value;
+
+                speech.lang = selectedLanguage === 'hi' ? 'hi-IN' :
+                    selectedLanguage === 'te' ? 'te-IN' : 'en-US';
+
+                window.speechSynthesis.speak(speech);
+            }
+        }
+
+        function stopSpeaking() {
+            window.speechSynthesis.cancel();
+        }
+
+        document.getElementById('userInput').addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+        header {
+            width: 100%;
+            background-color: blue; /* Header background color set to blue */
+            color: white; /* MGIT text color set to white */
+            padding: 10px 0;
+            text-align: center;
+            font-size: 24px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        header img {
+            position: absolute;
+            left: 10px;
+            height: 40px;
+            background-color: white; /* White background for the image */
+            padding: 5px; /* Padding to create separation between the image and its border */
+            border-radius: 5px; /* Optional: rounded corners */
+        }
+        #chatContainer {
+            width: 80%;
+            border: 1px solid #ccc;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 80%;
+            position: relative;
+            background-image: url('https://play-lh.googleusercontent.com/CDQ5kmeRh4RyFGhKhUhYOlTBQxPfkwq-lVbe-Cxv5RZk1Embioh5YyK_tIrHwmTd4Fs=w600-h300-pc0xffffff-pd');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 650px;
+            overflow-y: auto;
+        }
+        #messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(255, 255, 255, 0.8); /* Slight opacity for chat messages */
+            margin-bottom: 10px;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .message {
+            margin: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            width: fit-content;
+        }
+        .user {
+            align-self: flex-start;
+            background-color: #bde0fe;
+        }
+        .bot {
+            align-self: flex-end;
+            background-color: #caf0f8;
+        }
+        #inputContainer {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Space between the input box and buttons */
+            margin-bottom: 10px;
+            width: 100%; /* Adjust width to fit parent */
+        }
+        
+        #userInput {
+            flex: 1; /* Input box takes the remaining space */
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            height: 40px;
+        }
+        
+        #speakButton,
+        #sendButton {
+            padding: 5px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            height: 40px; /* Match the input box height */
+        }
+        
+        #speakButton {
+            background-color: pink;
+            color: white;
+        }
+        
+        #sendButton {
+            background-color: green;
+            color: white;
+        }
+        #stopLanguageContainer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        #stopButton {
+            background-color: red;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #language {
+            padding: 10px;
+            font-size: 16px;
+            margin-left: auto; /* Push the dropdown to the right */
+        }
+        
+        
+        
+        #speakButton:hover {
+            background-color: #ff69b4; /* Darker pink on hover */
+        }
+        
+        #sendButton:hover {
+            background-color: #32cd32; /* Lighter green on hover */
+        }
+        
+        #stopButton:hover {
+            background-color: #dc143c; /* Crimson on hover */
+        }
+        
+       
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://mgit.ac.in/wp-content/uploads/2022/09/logo5-mgit-25-09-2022.png" alt="MGIT Logo">
+        MGIT College
+    </header>
+    <div id="chatContainer">
+        <div id="messages"></div>
+        <div id="inputContainer">
+            <input type="text" id="userInput" placeholder="Type your question...">
+            <button id="speakButton" onclick="startSpeechRecognition()">🎤</button>
+            <button id="sendButton" onclick="sendMessage()">Send</button>
+        </div>
+        <div id="stopLanguageContainer">
+            <button id="stopButton" onclick="stopSpeaking()">Stop</button>
+            <select id="language" name="language">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+                <option value="te">Telugu</option>
+            </select>
+        </div>
+        
+        
+    </div>
+
+    <script>
+        function startSpeechRecognition() {
+            const speakButton = document.getElementById('speakButton');
+    
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Your browser does not support speech recognition.");
+                return;
+            }
+    
+            const recognition = new webkitSpeechRecognition();
+            recognition.lang = "en-US";
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+    
+            recognition.onstart = function() {
+                console.log("Voice recognition started. Speak into the microphone.");
+            };
+    
+            recognition.onspeechend = function() {
+                recognition.stop();
+            };
+    
+            recognition.onresult = function(event) {
+                const speechResult = event.results[0][0].transcript;
+                document.getElementById('userInput').value = speechResult;
+                sendMessage();
+            };
+    
+            recognition.onerror = function(event) {
+                console.error("Error occurred in recognition:", event.error);
+                alert("Error with speech recognition. Please try again.");
+            };
+    
+            recognition.start();
+        }
+        
+        function sendMessage() {
+            const userInput = document.getElementById('userInput').value;
+            const selectedLanguage = document.getElementById('language').value;
+            
+            if (!userInput) {
+                alert('Please enter a message');
+                return;
+            }
+        
+            displayMessage(userInput, 'user');
+            
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userInput, language: selectedLanguage })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayMessage(data.response, 'bot');
+            });
+        }
+        
+        function displayMessage(text, sender) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.innerHTML = text;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            if (sender === 'bot') {
+                const speech = new SpeechSynthesisUtterance(text);
+                const selectedLanguage = document.getElementById('language').value;
+                const voices = window.speechSynthesis.getVoices();
+
+                if (voices.length === 0) {
+                    window.speechSynthesis.onvoiceschanged = function() {
+                        setLanguageForSpeech(speech, selectedLanguage, window.speechSynthesis.getVoices());
+                        window.speechSynthesis.speak(speech);
+                    };
+                } else {
+                    setLanguageForSpeech(speech, selectedLanguage, voices);
+                    window.speechSynthesis.speak(speech);
+                }
+            }
+        }
+
+        function setLanguageForSpeech(speech, selectedLanguage, voices) {
+            let voice;
+            switch (selectedLanguage) {
+                case 'hi':
+                    voice = voices.find(voice => voice.lang === 'hi-IN');
+                    speech.lang = 'hi-IN';
+                    break;
+                case 'te':
+                    voice = voices.find(voice => voice.lang === 'te-IN');
+                    speech.lang = 'te-IN';
+                    break;
+                case 'en':
+                default:
+                    voice = voices.find(voice => voice.lang === 'en-US');
+                    speech.lang = 'en-US';
+                    break;
+            }
+
+            if (voice) {
+                speech.voice = voice;
+            }
+
+            speech.rate = 1;
+            speech.pitch = 1;
+            speech.volume = 1;
+        }
+        
+        function stopSpeaking() {
+            window.speechSynthesis.cancel();
+        }
+        
+        document.getElementById('userInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
